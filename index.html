@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rohit Kumar - Portfolio</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700;900&display=swap"
+        rel="stylesheet">
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- CUSTOM CURSOR -->
+    <div class="cursor-dot" data-cursor-dot></div>
+    <div class="cursor-outline" data-cursor-outline></div>
+    <canvas id="cursor-trail-canvas" aria-hidden="true"></canvas>
+
+
+
+
+    <!-- BACKGROUND -->
+    <div class="hero-tide-background" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;"></div>
+    <canvas id="particle-network" aria-hidden="true"></canvas>
+
+    <!-- HEADER -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <a href="#" class="nav__logo">Rohit Kumar</a>
+
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="#home" class="nav__link active-link">Home</a></li>
+                    <li class="nav__item"><a href="#about" class="nav__link">About</a></li>
+                    <li class="nav__item"><a href="#skills" class="nav__link">Skills</a></li>
+                    <li class="nav__item"><a href="#projects" class="nav__link">Projects</a></li>
+                    <li class="nav__item"><a href="#qualification" class="nav__link">Qualification</a></li>
+                    <li class="nav__item"><a href="#contact" class="nav__link">Contact</a></li>
+                    <li class="nav__item"><a href="assets/resume.pdf" target="_blank" class="nav__link"
+                            style="font-weight: 700; color: #0C1252;">Resume <i class='bx bx-download'></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main">
+        <!-- HOME SECTION -->
+        <section class="home section" id="home">
+            <div class="home__container container grid">
+                <div class="home__content grid">
+                    <div class="home__social">
+                        <a href="mailto:rohithimanshu08@gmail.com" class="home__social-icon">
+                            <i class='bx bx-envelope'></i>
+                        </a>
+                        <a href="tel:+916202095002" class="home__social-icon">
+                            <i class='bx bx-phone'></i>
+                        </a>
+                        <a href="#contact" class="home__social-icon">
+                            <i class='bx bx-map'></i>
+                        </a>
+                    </div>
+
+                    <div class="home__data" style="position: relative; z-index: 10;">
+                        <h1 class="home__title name-sunrise water-text">Rohit <br> Kumar <span class="hand">👋</span></h1>
+                        <h3 class="home__subtitle text-light water-text-soft">Manager-Design | Engine and Aggregates</h3>
+                        <p class="home__description text-light water-text-soft">
+                            An enthusiastic professional with design and development experience in heavy construction
+                            machinery, seeking challenging opportunities where academic knowledge, technical skills,
+                            and industrial experience can be utilized efficiently.
+                        </p>
+                        <a href="#contact" class="button">Say Hi <i class='bx bx-send'></i></a>
+
+                        <div class="home__scroll">
+                            <a href="#about" class="home__scroll-button">
+                                <i class='bx bx-mouse home__scroll-mouse text-light'></i>
+                                <span class="home__scroll-name text-light">Scroll Down &darr;</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="home__img-wrapper">
+                        <div class="home__img">
+                            <img src="assets/roht.jpeg" alt="Rohit's Photo" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT SECTION -->
+        <section class="about section" id="about">
+            <h2 class="section__title water-text">About Me</h2>
+            <span class="section__subtitle water-text-soft">My Introduction</span>
+
+            <div class="about__container container grid">
+                <img src="assets/roht.jpeg" alt="Rohit Kumar" class="about__img"
+                    style="border-radius: 50%; width: 350px; height: 350px; object-fit: cover; border: 4px solid var(--container-color); box-shadow: 0 4px 12px rgba(12, 18, 82, 0.1);">
+
+                <div class="about__data">
+                    <div class="about__info grid">
+                        <div class="about__box">
+                            <i class='bx bx-award about__icon'></i>
+                            <h3 class="about__title">Experience</h3>
+                            <span class="about__subtitle">July 2022 - Present</span>
+                        </div>
+                        <div class="about__box">
+                            <i class='bx bx-briefcase-alt about__icon'></i>
+                            <h3 class="about__title">Current Role</h3>
+                            <span class="about__subtitle">Design Engineer - Engine and Aggregates</span>
+                        </div>
+                        <div class="about__box">
+                            <i class='bx bx-support about__icon'></i>
+                            <h3 class="about__title">Hobby</h3>
+                            <span class="about__subtitle">Reading newspaper</span>
+                        </div>
+                    </div>
+
+                    <p class="about__description">
+                        I am Rohit Kumar, currently working at Tata Hitachi Construction Machinery Company Pvt. Ltd.,
+                        Dharwad, as Manager-Design. I handle engine and aggregates development for excavators and backhoe
+                        loaders, including NPI, optimization, VAVE, and BSIII to BSIV/BSV emission transitions aligned
+                        with CEV requirements for domestic and export machines.
+                    </p>
+
+                    <a href="assets/resume.pdf" target="_blank" class="button">View Resume <i
+                            class='bx bx-file-blank'></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SKILLS SECTION -->
+        <section class="skills section" id="skills">
+            <h2 class="section__title water-text">Skills</h2>
+            <span class="section__subtitle water-text-soft">My technical level</span>
+
+            <div class="skills__container container grid">
+
+                <!-- CAD and PLM -->
+                <div class="skills__content">
+                    <h3 class="skills__title">CAD and PLM</h3>
+                    <div class="skills__box">
+                        <div class="skills__group">
+                            <div class="skills__data">
+                                <i class='bx bx-cube'></i>
+                                <div>
+                                    <h3 class="skills__name">Siemens NX (CAD)</h3>
+                                    <span class="skills__level">Advanced</span>
+                                </div>
+                            </div>
+                            <div class="skills__data">
+                                <i class='bx bx-data'></i>
+                                <div>
+                                    <h3 class="skills__name">Teamcenter Enterprise (PLM)</h3>
+                                    <span class="skills__level">Advanced</span>
+                                </div>
+                            </div>
+                            <div class="skills__data">
+                                <i class='bx bx-git-branch'></i>
+                                <div>
+                                    <h3 class="skills__name">Teamcenter Unified Architecture (PLM)</h3>
+                                    <span class="skills__level">Intermediate</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="skills__group">
+                            <div class="skills__data">
+                                <i class='bx bx-file'></i>
+                                <div>
+                                    <h3 class="skills__name">MS Office</h3>
+                                    <span class="skills__level">Intermediate</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation and Analysis -->
+                <div class="skills__content">
+                    <h3 class="skills__title">Simulation and Analysis</h3>
+                    <div class="skills__box">
+                        <div class="skills__group">
+                            <div class="skills__data">
+                                <i class='bx bx-line-chart'></i>
+                                <div>
+                                    <h3 class="skills__name">MATLAB</h3>
+                                    <span class="skills__level">Intermediate</span>
+                                </div>
+                            </div>
+                            <div class="skills__data">
+                                <i class='bx bx-shape-circle'></i>
+                                <div>
+                                    <h3 class="skills__name">COMSOL</h3>
+                                    <span class="skills__level">Intermediate</span>
+                                </div>
+                            </div>
+                            <div class="skills__data">
+                                <i class='bx bx-cog'></i>
+                                <div>
+                                    <h3 class="skills__name">ANSYS</h3>
+                                    <span class="skills__level">Intermediate</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domain Expertise -->
+                <div class="skills__content dsa-content">
+                    <h3 class="skills__title">Domain Expertise</h3>
+                    <div class="skills__box">
+                        <div class="skills__group"
+                            style="align-items: center; justify-items: center; display: flex; flex-direction: column; gap: 1.5rem;">
+                            <div class="skills__data">
+                                <i class='bx bx-wrench'></i>
+                                <div>
+                                    <h3 class="skills__name">Engine and Aggregates Design</h3>
+                                    <span class="skills__level">Advanced</span>
+                                </div>
+                            </div>
+                            <div class="skills__data">
+                                <i class='bx bx-check-shield'></i>
+                                <div>
+                                    <h3 class="skills__name">Emission Norm Compliance (BS, EPA, CARB, EU)</h3>
+                                    <span class="skills__level">Advanced</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PROJECTS SECTION -->
+        <section class="projects section" id="projects">
+            <h2 class="section__title water-text">Key Work Areas</h2>
+
+            <div class="projects__container container grid" style="grid-template-columns: repeat(2, 1fr);">
+                <!-- Project 1 -->
+                <div class="projects__card">
+                    <i class='bx bx-cog projects__icon'></i>
+                    <h3 class="projects__title">Engine and Aggregates<br>Development</h3>
+                    <a href="#qualification" class="projects__button">
+                        View Details <i class='bx bx-right-arrow-alt projects__button-icon'></i>
+                    </a>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="projects__card">
+                    <i class='bx bx-transfer-alt projects__icon'></i>
+                    <h3 class="projects__title">BSIII to BSIV and BSV<br>Engine Transition</h3>
+                    <a href="#qualification" class="projects__button">
+                        View Details <i class='bx bx-right-arrow-alt projects__button-icon'></i>
+                    </a>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="projects__card">
+                    <i class='bx bx-trending-up projects__icon'></i>
+                    <h3 class="projects__title">Performance and System<br>Optimization</h3>
+                    <a href="#qualification" class="projects__button">
+                        View Details <i class='bx bx-right-arrow-alt projects__button-icon'></i>
+                    </a>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="projects__card">
+                    <i class='bx bx-check-circle projects__icon'></i>
+                    <h3 class="projects__title">Standards and Emission<br>Compliance Validation</h3>
+                    <a href="#qualification" class="projects__button">
+                        View Details <i class='bx bx-right-arrow-alt projects__button-icon'></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUALIFICATION SECTION -->
+        <section class="qualification section" id="qualification">
+            <h2 class="section__title water-text">Qualification</h2>
+            <span class="section__subtitle water-text-soft">My Personal Journey</span>
+
+            <div class="qualification__container container">
+                <div class="qualification__tabs">
+                    <div class="qualification__button qualification__active" data-target="#education">
+                        <i class='bx bxs-graduation qualification__icon'></i> Education
+                    </div>
+                    <div class="qualification__button" data-target="#experience">
+                        <i class='bx bx-briefcase-alt qualification__icon'></i> Experience
+                    </div>
+                </div>
+
+                <div class="qualification__sections">
+                    <div class="qualification__content qualification__active" data-content id="education">
+
+                        <!-- Qual 1 -->
+                        <div class="qualification__data">
+                            <div>
+                                <h3 class="qualification__title">M.Tech - Machine Design</h3>
+                                <span class="qualification__subtitle">National Institute of Technology, Durgapur</span>
+                                <div class="qualification__calendar">
+                                    <i class='bx bx-calendar'></i> 2022 | CGPA: 8.67
+                                </div>
+                            </div>
+                            <div>
+                                <span class="qualification__rounder"></span>
+                                <span class="qualification__line"></span>
+                            </div>
+                        </div>
+
+                        <!-- Qual 2 -->
+                        <div class="qualification__data">
+                            <div></div>
+                            <div>
+                                <span class="qualification__rounder"></span>
+                                <span class="qualification__line"></span>
+                            </div>
+                            <div>
+                                <h3 class="qualification__title">B.Tech - Mechanical Engineering</h3>
+                                <span class="qualification__subtitle">C.V. Raman Global University, Odisha</span>
+                                <div class="qualification__calendar">
+                                    <i class='bx bx-calendar'></i> 2020 | CGPA: 8.25
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Qual 3 -->
+                        <div class="qualification__data">
+                            <div>
+                                <h3 class="qualification__title">12th Science (Mathematics)</h3>
+                                <span class="qualification__subtitle">BSEB, Patna</span>
+                                <div class="qualification__calendar">
+                                    <i class='bx bx-calendar'></i> 2015 | 68.4%
+                                </div>
+                            </div>
+                            <div>
+                                <span class="qualification__rounder"></span>
+                                <span class="qualification__line"></span>
+                            </div>
+                        </div>
+
+                        <!-- Qual 4 -->
+                        <div class="qualification__data">
+                            <div></div>
+                            <div>
+                                <span class="qualification__rounder"></span>
+                            </div>
+                            <div>
+                                <h3 class="qualification__title">10th</h3>
+                                <span class="qualification__subtitle">BSEB, Patna</span>
+                                <div class="qualification__calendar">
+                                    <i class='bx bx-calendar'></i> 2013 | 73%
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="qualification__content" data-content id="experience">
+                        <div class="qualification__data">
+                            <div>
+                                <h3 class="qualification__title">Design Engineer - Engine (Diesel) and Aggregates</h3>
+                                <span class="qualification__subtitle">Tata Hitachi Construction Machinery Company Pvt. Ltd.</span>
+                                <div class="qualification__calendar">
+                                    <i class='bx bx-calendar'></i> April 2024 - Present
+                                </div>
+                            </div>
+                            <div>
+                                <span class="qualification__rounder"></span>
+                                <span class="qualification__line"></span>
+                            </div>
+                        </div>
+
+                        <div class="qualification__data">
+                            <div></div>
+                            <div>
+                                <span class="qualification__rounder"></span>
+                            </div>
+                            <div>
+                                <h3 class="qualification__title">Design Engineer - Machine Integration (13 Ton Class Excavator)</h3>
+                                <span class="qualification__subtitle">Tata Hitachi Construction Machinery Company Pvt. Ltd.</span>
+                                <div class="qualification__calendar">
+                                    <i class='bx bx-calendar'></i> July 2022 - March 2024
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section class="contact section" id="contact">
+            <div class="contact__container container grid">
+                <div class="contact__content contact__split">
+                    <div class="contact__ribbon">Responsive</div>
+
+                    <div class="contact__intro">
+                        <h2 class="contact__hero-title water-text">Contact Us</h2>
+                        <p class="contact__hero-subtitle water-text-soft">
+                            Feel free to contact me for professional opportunities and engineering collaborations.
+                        </p>
+                    </div>
+
+                    <div class="contact__info-panel">
+                        <div class="contact__item">
+                            <div class="contact__icon-circle">
+                                <i class='bx bx-map'></i>
+                            </div>
+                            <div class="contact__item-copy">
+                                <h3 class="contact__item-title">Address</h3>
+                                <p>Narsara, Hanuman Nagar, Darbhanga, Bihar - 846003</p>
+                            </div>
+                        </div>
+
+                        <div class="contact__item">
+                            <div class="contact__icon-circle">
+                                <i class='bx bx-phone'></i>
+                            </div>
+                            <div class="contact__item-copy">
+                                <h3 class="contact__item-title">Phone</h3>
+                                <p>+91-6202095002</p>
+                            </div>
+                        </div>
+
+                        <div class="contact__item">
+                            <div class="contact__icon-circle">
+                                <i class='bx bx-envelope'></i>
+                            </div>
+                            <div class="contact__item-copy">
+                                <h3 class="contact__item-title">Email</h3>
+                                <p>rohithimanshu08@gmail.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact__form-panel">
+                        <h3 class="contact__form-title">Send Message</h3>
+                        <form id="contactForm" class="contact__form" novalidate>
+                            <div class="contact__field">
+                                <input id="cName" type="text" placeholder="Full Name" required>
+                            </div>
+                            <div class="contact__field">
+                                <input id="cEmail" type="email" placeholder="Email" required>
+                            </div>
+                            <div class="contact__field contact__field--textarea">
+                                <textarea id="cMessage" rows="3" placeholder="Type your message..." required></textarea>
+                            </div>
+                            <button type="submit" class="contact__send btn-send">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- SCROLL TOP -->
+    <a href="#" class="scrollup" id="scroll-up">
+        <i class='bx bx-up-arrow-alt scrollup__icon'></i>
+    </a>
+
+    <!-- Main JS (if any) -->
+    <script src="js/main.js"></script>
+    <!-- Premium Water Ripple Background -->
+    <script src="js/water-ripple.js"></script>
+</body>
+
+</html>
