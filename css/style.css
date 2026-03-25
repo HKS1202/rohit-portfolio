@@ -1562,19 +1562,35 @@ body {
   z-index: 2;
   mix-blend-mode: screen;
   background:
+    /* 1. White-hot core — tiny, blazing bright */
     radial-gradient(
-      700px circle at var(--sx, -9999px) var(--sy, -9999px),
-      rgba(0, 200, 255, 0.09) 0%,
-      rgba(0, 140, 210, 0.045) 40%,
-      transparent 70%
+      70px circle at var(--sx, -9999px) var(--sy, -9999px),
+      rgba(210, 248, 255, 0.65) 0%,
+      rgba(80, 220, 255, 0.30) 55%,
+      transparent 100%
     ),
+    /* 2. Vivid mid glow — punchy cyan */
     radial-gradient(
-      180px circle at var(--sx, -9999px) var(--sy, -9999px),
-      rgba(120, 240, 255, 0.13) 0%,
-      transparent 80%
+      260px circle at var(--sx, -9999px) var(--sy, -9999px),
+      rgba(0, 210, 255, 0.38) 0%,
+      rgba(0, 170, 240, 0.18) 50%,
+      transparent 100%
+    ),
+    /* 3. Wide ambient — softer spread */
+    radial-gradient(
+      600px circle at var(--sx, -9999px) var(--sy, -9999px),
+      rgba(0, 160, 230, 0.18) 0%,
+      rgba(0, 100, 200, 0.07) 55%,
+      transparent 100%
+    ),
+    /* 4. Ultra-wide outer haze */
+    radial-gradient(
+      950px circle at var(--sx, -9999px) var(--sy, -9999px),
+      rgba(0, 120, 200, 0.08) 0%,
+      transparent 70%
     );
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.6s ease;
   will-change: background;
 }
 

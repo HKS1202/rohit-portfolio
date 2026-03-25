@@ -729,8 +729,8 @@ if (xrayCards && xrayCards.length > 0) {
 
   const tickSpotlight = () => {
     // Smooth lerp: spotlight trails the cursor slightly for a fluid feel
-    currentX += (targetX - currentX) * 0.12;
-    currentY += (targetY - currentY) * 0.12;
+    currentX += (targetX - currentX) * 0.18;
+    currentY += (targetY - currentY) * 0.18;
     spotlight.style.setProperty('--sx', `${currentX.toFixed(2)}px`);
     spotlight.style.setProperty('--sy', `${currentY.toFixed(2)}px`);
     requestAnimationFrame(tickSpotlight);
