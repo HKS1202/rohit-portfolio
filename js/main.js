@@ -699,5 +699,42 @@ if (xrayCards && xrayCards.length > 0) {
   }, { passive: true });
 }
 
+/* ── CURSOR SPOTLIGHT ─────────────────────────────────────── */
+(function initCursorSpotlight() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
 
+  const spotlight = document.createElement('div');
+  spotlight.id = 'cursor-spotlight';
+  document.body.appendChild(spotlight);
 
+  let targetX = -9999;
+  let targetY = -9999;
+  let currentX = -9999;
+  let currentY = -9999;
+  let isActive = false;
+
+  window.addEventListener('mousemove', (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+    if (!isActive) {
+      isActive = true;
+      spotlight.classList.add('active');
+    }
+  }, { passive: true });
+
+  window.addEventListener('mouseleave', () => {
+    isActive = false;
+    spotlight.classList.remove('active');
+  });
+
+  const tickSpotlight = () => {
+    // Smooth lerp: spotlight trails the cursor slightly for a fluid feel
+    currentX += (targetX - currentX) * 0.12;
+    currentY += (targetY - currentY) * 0.12;
+    spotlight.style.setProperty('--sx', `${currentX.toFixed(2)}px`);
+    spotlight.style.setProperty('--sy', `${currentY.toFixed(2)}px`);
+    requestAnimationFrame(tickSpotlight);
+  };
+
+  requestAnimationFrame(tickSpotlight);
+}());
