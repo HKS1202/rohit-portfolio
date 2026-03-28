@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deep Water — Interactive Depth Experience</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --abyss:    #010d18;
+      --deep:     #02213a;
+      --mid:      #04436e;
+      --surface:  #0a7ea4;
+      --foam:     #b3e9f7;
+      --glow:     #00d4ff;
+      --bio:      #00ffcc;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--abyss);
+      font-family: 'Outfit', sans-serif;
+      cursor: none;
+    }
+
+    /* ── Canvas stack ── */
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #c-bg       { z-index: 1; }   /* background gradient + caustics */
+    #c-rays     { z-index: 2; mix-blend-mode: screen; }   /* god rays */
+    #c-ripple   { z-index: 3; mix-blend-mode: overlay; opacity: 0.55; } /* water ripples */
+    #c-particles{ z-index: 4; mix-blend-mode: screen; }   /* bio particles */
+    #c-ui       { z-index: 5; }   /* depth gauge + cursor */
+
+    /* ── Depth HUD ── */
+    #hud {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* depth meter on the right */
+    #depth-meter {
+      position: absolute;
+      right: 36px; top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    #depth-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--foam);
+      opacity: 0.6;
+      text-transform: uppercase;
+    }
+    #depth-bar {
+      width: 4px;
+      height: 220px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    #depth-fill {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, var(--bio), var(--glow), var(--surface));
+      border-radius: 2px;
+      transition: height 0.6s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 0 8px var(--glow);
+    }
+    #depth-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--glow);
+      text-shadow: 0 0 12px var(--glow);
+    }
+    #depth-unit {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--foam);
+      opacity: 0.5;
+    }
+
+    /* top title */
+    #title-wrap {
+      position: absolute;
+      top: 40px; left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+    #title-wrap h1 {
+      font-size: clamp(24px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #b3e9f7 0%, #00d4ff 50%, #00ffcc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 0 20px rgba(0,212,255,0.6));
+    }
+    #title-wrap p {
+      margin-top: 6px;
+      font-size: clamp(11px, 1.5vw, 14px);
+      letter-spacing: 4px;
+      color: var(--foam);
+      opacity: 0.55;
+      text-transform: uppercase;
+    }
+
+    /* bottom info */
+    #info-bar {
+      position: absolute;
+      bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+    #info-bar span {
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: var(--foam);
+      opacity: 0.4;
+      text-transform: uppercase;
+    }
+
+    /* pressure badge */
+    #pressure-badge {
+      position: absolute;
+      left: 36px; bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--bio);
+      box-shadow: 0 0 8px var(--bio);
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.6); }
+    }
+    .badge-text {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--foam);
+      opacity: 0.55;
+    }
+    #pressure-val {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--bio);
+      text-shadow: 0 0 12px var(--bio);
+      margin-left: 14px;
+    }
+
+    /* temp badge top-left */
+    #temp-badge {
+      position: absolute;
+      left: 36px; top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .temp-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--foam);
+      opacity: 0.45;
+      text-transform: uppercase;
+    }
+    #temp-val {
+      font-size: 20px;
+      font-weight: 600;
+      color: #5cf0ff;
+      text-shadow: 0 0 14px #5cf0ff;
+    }
+
+    /* custom cursor */
+    #cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 2px solid rgba(0,212,255,0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: transform 0.05s linear, width 0.3s, height 0.3s, border-color 0.3s;
+      mix-blend-mode: screen;
+    }
+    #cursor-dot {
+      position: fixed;
+      width: 6px; height: 6px;
+      background: var(--glow);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%,-50%);
+      box-shadow: 0 0 10px var(--glow);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Canvases -->
+<canvas id="c-bg"></canvas>
+<canvas id="c-rays"></canvas>
+<canvas id="c-ripple"></canvas>
+<canvas id="c-particles"></canvas>
+<canvas id="c-ui"></canvas>
+
+<!-- HUD overlay -->
+<div id="hud">
+  <div id="title-wrap">
+    <h1>DEEP WATER</h1>
+    <p>Interactive Depth Simulation</p>
+  </div>
+
+  <div id="temp-badge">
+    <div class="temp-label">Temperature</div>
+    <div id="temp-val">22.4°C</div>
+  </div>
+
+  <div id="depth-meter">
+    <div id="depth-label">Depth</div>
+    <div id="depth-bar"><div id="depth-fill" style="height:0%"></div></div>
+    <div id="depth-value">0</div>
+    <div id="depth-unit">meters</div>
+  </div>
+
+  <div id="pressure-badge">
+    <div class="badge-row"><div class="badge-dot"></div><div class="badge-text">Pressure</div></div>
+    <div id="pressure-val">1.00 atm</div>
+  </div>
+
+  <div id="info-bar">
+    <span>Move cursor to create ripples · Click for surge</span>
+  </div>
+</div>
+
+<!-- Custom cursor -->
+<div id="cursor-ring"></div>
+<div id="cursor-dot"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   DEEP WATER — INTERACTIVE DEPTH EFFECT
+   Multi-layer canvas simulation with:
+   • Animated background gradient that deepens with cursor Y
+   • Caustic light patterns (vertex distortion)
+   • God ray shafts from surface (top)
+   • Navier-Stokes-inspired ripple simulation
+   • Bioluminescent particle system
+   • Depth / pressure HUD
+   • Custom cursor with ripple burst on click
+══════════════════════════════════════════════════════════ */
+
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+// ── Canvas setup helper ──────────────────────────────────
+function setupCanvas(id) {
+  const el = document.getElementById(id);
+  const ctx = el.getContext('2d');
+  el.width  = W() * DPR;
+  el.height = H() * DPR;
+  el.style.width  = W() + 'px';
+  el.style.height = H() + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  return { el, ctx };
+}
+
+let cBg, cRays, cRipple, cPart, cUi;
+
+function initCanvases() {
+  cBg    = setupCanvas('c-bg');
+  cRays  = setupCanvas('c-rays');
+  cRipple= setupCanvas('c-ripple');
+  cPart  = setupCanvas('c-particles');
+  cUi    = setupCanvas('c-ui');
+}
+
+initCanvases();
+
+// ── Mouse / Touch state ──────────────────────────────────
+const mouse = { x: W()/2, y: H()/2, vx:0, vy:0, down: false };
+let prevMX = mouse.x, prevMY = mouse.y;
+let depth = 0;          // 0..1  (normalised cursor Y)
+let targetDepth = 0;
+let clickBursts = [];
+
+document.addEventListener('mousemove', e => {
+  prevMX = mouse.x; prevMY = mouse.y;
+  mouse.x = e.clientX; mouse.y = e.clientY;
+  mouse.vx = mouse.x - prevMX;
+  mouse.vy = mouse.y - prevMY;
+  targetDepth = e.clientY / H();
+  moveCursor(e.clientX, e.clientY);
+});
+
+document.addEventListener('mousedown', e => {
+  mouse.down = true;
+  clickBursts.push({ x: e.clientX, y: e.clientY, t: 0, max: 280 });
+  // drop a big ripple
+  dropRipple(e.clientX, e.clientY, 8);
+  document.getElementById('cursor-ring').style.width  = '56px';
+  document.getElementById('cursor-ring').style.height = '56px';
+  document.getElementById('cursor-ring').style.borderColor = 'rgba(0,255,204,0.9)';
+});
+document.addEventListener('mouseup', () => {
+  mouse.down = false;
+  document.getElementById('cursor-ring').style.width  = '36px';
+  document.getElementById('cursor-ring').style.height = '36px';
+  document.getElementById('cursor-ring').style.borderColor = 'rgba(0,212,255,0.6)';
+});
+
+// touch
+document.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  mouse.x = t.clientX; mouse.y = t.clientY;
+  targetDepth = t.clientY / H();
+  moveCursor(t.clientX, t.clientY);
+  dropRipple(t.clientX, t.clientY, 2);
+}, { passive: true });
+document.addEventListener('touchstart', e => {
+  const t = e.touches[0];
+  clickBursts.push({ x: t.clientX, y: t.clientY, t: 0, max: 280 });
+  dropRipple(t.clientX, t.clientY, 8);
+}, { passive: true });
+
+function moveCursor(x, y) {
+  const r = document.getElementById('cursor-ring');
+  const d = document.getElementById('cursor-dot');
+  r.style.left = x + 'px'; r.style.top  = y + 'px';
+  d.style.left = x + 'px'; d.style.top  = y + 'px';
+}
+
+// ── Ripple simulation (Navier-Stokes-lite wave eq.) ──────
+const RSCALE = 0.35;   // resolution scale for ripple buffer
+let rW, rH, buf0, buf1;
+
+function initRipple() {
+  rW = Math.floor(W() * RSCALE) | 1;
+  rH = Math.floor(H() * RSCALE) | 1;
+  buf0 = new Float32Array(rW * rH);
+  buf1 = new Float32Array(rW * rH);
+}
+
+function dropRipple(x, y, radius) {
+  const rx = Math.floor(x * RSCALE);
+  const ry = Math.floor(y * RSCALE);
+  const r  = Math.ceil(radius);
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if (dx*dx + dy*dy > r*r) continue;
+      const nx = rx + dx, ny = ry + dy;
+      if (nx < 0 || nx >= rW || ny < 0 || ny >= rH) continue;
+      const falloff = 1 - Math.sqrt(dx*dx + dy*dy) / r;
+      buf0[ny * rW + nx] = 1.0 * falloff;
+    }
+  }
+}
+
+function stepRipple() {
+  const DAMP = 0.985;
+  for (let y = 1; y < rH - 1; y++) {
+    for (let x = 1; x < rW - 1; x++) {
+      const i = y * rW + x;
+      buf1[i] = (
+        buf0[(y-1)*rW + x] +
+        buf0[(y+1)*rW + x] +
+        buf0[y*rW + (x-1)] +
+        buf0[y*rW + (x+1)]
+      ) * 0.5 - buf1[i];
+      buf1[i] *= DAMP;
+    }
+  }
+  const tmp = buf0; buf0 = buf1; buf1 = tmp;
+}
+
+function drawRipple() {
+  const { ctx } = cRipple;
+  const id = ctx.createImageData(rW, rH);
+  const d  = id.data;
+  for (let i = 0; i < rW * rH; i++) {
+    const v   = buf0[i];
+    const abs = Math.min(1, Math.abs(v));
+    // encode as blue-white ripple tones
+    const r = Math.floor(abs * 60  + (1-abs) * 0);
+    const g = Math.floor(abs * 200 + (1-abs) * 80);
+    const b = Math.floor(abs * 255);
+    const a = Math.floor(abs * 220);
+    d[i*4]   = r;
+    d[i*4+1] = g;
+    d[i*4+2] = b;
+    d[i*4+3] = a;
+  }
+  // draw small image then scale up via CSS
+  const tmp = document.createElement('canvas');
+  tmp.width  = rW;
+  tmp.height = rH;
+  tmp.getContext('2d').putImageData(id, 0, 0);
+  ctx.clearRect(0, 0, W(), H());
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(tmp, 0, 0, W(), H());
+}
+
+initRipple();
+
+// ── Caustic animation ────────────────────────────────────
+let causticTime = 0;
+
+function drawCaustics(ctx, t) {
+  ctx.clearRect(0, 0, W(), H());
+  // We layer several sine-based lenses as circular gradients
+  const count = 26;
+  for (let i = 0; i < count; i++) {
+    const seed  = i * 137.508 * Math.PI;
+    const bx    = (Math.sin(t * 0.3 + seed) * 0.5 + 0.5) * W();
+    const by    = (Math.cos(t * 0.21 + seed * 0.7) * 0.4 + 0.3) * H() * (1 - depth * 0.5);
+    const rad   = 80 + Math.sin(t * 0.5 + seed) * 40;
+    const alpha = 0.022 + 0.018 * Math.abs(Math.sin(t * 0.4 + i));
+
+    const grad = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
+    grad.addColorStop(0,   `rgba(0,220,255,${alpha})`);
+    grad.addColorStop(0.4, `rgba(0,150,200,${alpha * 0.4})`);
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(bx, by, rad, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ── God rays ────────────────────────────────────────────
+let rayPhase = 0;
+
+function drawGodRays(ctx, t) {
+  ctx.clearRect(0, 0, W(), H());
+  const cx = W() / 2 + Math.sin(t * 0.08) * W() * 0.15;
+  const numRays = 14;
+  const surfaceY = H() * 0.04;
+
+  for (let i = 0; i < numRays; i++) {
+    const angle  = -Math.PI/2 + (i - numRays/2) * 0.18 + Math.sin(t * 0.12 + i * 0.7) * 0.06;
+    const length = H() * (0.55 + 0.2 * Math.sin(t * 0.2 + i));
+    const alpha  = 0.04 + 0.04 * Math.abs(Math.sin(t * 0.18 + i * 0.5));
+    const width  = 40 + 30 * Math.sin(t * 0.15 + i * 1.3);
+
+    const endX = cx + Math.cos(angle) * length;
+    const endY = surfaceY + Math.sin(angle) * length;
+
+    const grad = ctx.createLinearGradient(cx, surfaceY, endX, endY);
+    grad.addColorStop(0,   `rgba(120,230,255,${alpha})`);
+    grad.addColorStop(0.5, `rgba(40,180,255,${alpha * 0.5})`);
+    grad.addColorStop(1,   'rgba(0,100,200,0)');
+
+    ctx.save();
+    ctx.translate(cx, surfaceY);
+    ctx.rotate(angle + Math.PI/2);
+    const rayGrad = ctx.createLinearGradient(0, 0, 0, length);
+    rayGrad.addColorStop(0,   `rgba(180,240,255,${alpha * 1.5})`);
+    rayGrad.addColorStop(0.4, `rgba(60,200,255,${alpha})`);
+    rayGrad.addColorStop(1,   'rgba(0,80,180,0)');
+    ctx.fillStyle = rayGrad;
+    ctx.beginPath();
+    ctx.moveTo(-width/2, 0);
+    ctx.lineTo(width/2, 0);
+    ctx.lineTo(width * 1.5, length);
+    ctx.lineTo(-width * 1.5, length);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ── Background gradient ─────────────────────────────────
+function drawBackground(ctx, dep) {
+  ctx.clearRect(0, 0, W(), H());
+
+  // depth-responsive gradient: surface teal → midnight blue → abyss
+  const grad = ctx.createLinearGradient(0, 0, 0, H());
+  // surface shimmer
+  const alpha1 = 1 - dep * 0.6;
+  grad.addColorStop(0,    `rgba(4,100,140, ${alpha1})`);
+  grad.addColorStop(0.25, `rgba(2,60,100, 1)`);
+  grad.addColorStop(0.6,  `rgba(1,30,60, 1)`);
+  grad.addColorStop(1,    `rgba(0,8,20, 1)`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W(), H());
+
+  // faint caustic overlay on bg
+  drawCaustics(ctx, causticTime);
+}
+
+// ── Bioluminescent particles ─────────────────────────────
+const MAX_PARTICLES = 160;
+let particles = [];
+
+function spawnParticle(x, y, forced) {
+  if (particles.length >= MAX_PARTICLES && !forced) return;
+  const hue = 160 + Math.random() * 60;  // teal→cyan
+  particles.push({
+    x: x ?? Math.random() * W(),
+    y: y ?? H() * (0.3 + Math.random() * 0.7),
+    vx: (Math.random() - 0.5) * 0.6,
+    vy: -(0.4 + Math.random() * 1.2),
+    life: 1,
+    decay: 0.003 + Math.random() * 0.005,
+    size: 2 + Math.random() * 4,
+    hue,
+    drift: (Math.random() - 0.5) * 0.015,
+    phase: Math.random() * Math.PI * 2,
+    glow: 8 + Math.random() * 14,
+  });
+}
+
+function initParticles() {
+  for (let i = 0; i < 80; i++) spawnParticle(null, null, true);
+}
+initParticles();
+
+function updateParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.phase += dt * 1.2;
+    p.vx    += p.drift;
+    p.vy    -= 0.005 * dt;  // slow float-up acceleration
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life  -= p.decay;
+    if (p.life <= 0 || p.y < -20) {
+      particles.splice(i, 1);
+      spawnParticle(null, null, false);
+    }
+  }
+
+  // spawn near cursor movement
+  const speed = Math.sqrt(mouse.vx * mouse.vx + mouse.vy * mouse.vy);
+  if (speed > 3 && Math.random() < 0.35) {
+    spawnParticle(
+      mouse.x + (Math.random()-0.5)*24,
+      mouse.y + (Math.random()-0.5)*24,
+      false
+    );
+  }
+}
+
+function drawParticles(ctx) {
+  ctx.clearRect(0, 0, W(), H());
+  for (const p of particles) {
+    const wobble = Math.sin(p.phase) * 2;
+    ctx.save();
+    ctx.globalAlpha = p.life * (0.6 + 0.4 * Math.abs(Math.sin(p.phase)));
+    ctx.shadowColor  = `hsl(${p.hue},100%,70%)`;
+    ctx.shadowBlur   = p.glow;
+    ctx.fillStyle    = `hsl(${p.hue},100%,80%)`;
+    ctx.beginPath();
+    ctx.arc(p.x + wobble, p.y, p.size * p.life, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ── Click burst rings ────────────────────────────────────
+function drawClickBursts(ctx) {
+  for (let i = clickBursts.length - 1; i >= 0; i--) {
+    const b = clickBursts[i];
+    b.t++;
+    const prog  = b.t / 60;   // 0..1 over 60 frames
+    const r     = prog * b.max;
+    const alpha = (1 - prog) * 0.7;
+    if (prog >= 1) { clickBursts.splice(i, 1); continue; }
+
+    ctx.save();
+    ctx.strokeStyle = `rgba(0,255,204,${alpha})`;
+    ctx.lineWidth   = 2 * (1 - prog);
+    ctx.shadowColor = 'rgba(0,255,204,0.8)';
+    ctx.shadowBlur  = 18;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // second ring slightly behind
+    const r2 = r * 0.65;
+    ctx.strokeStyle = `rgba(0,212,255,${alpha * 0.5})`;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, r2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ── UI canvas (cursor cross-hair + burst) ───────────────
+function drawUI(ctx) {
+  ctx.clearRect(0, 0, W(), H());
+  // draw click bursts on this layer too for clean blending
+  drawClickBursts(ctx);
+}
+
+// ── HUD update ───────────────────────────────────────────
+const depthFill  = document.getElementById('depth-fill');
+const depthVal   = document.getElementById('depth-value');
+const pressureEl = document.getElementById('pressure-val');
+const tempEl     = document.getElementById('temp-val');
+
+function updateHUD(dep) {
+  const meters  = Math.round(dep * 3800);  // max 3800m (average ocean)
+  const pct     = dep * 100;
+  const atm     = (1 + dep * 379).toFixed(2);  // 1 + (depth/10)*atm
+  const temp    = Math.max(1.8, 22.4 - dep * 20.6).toFixed(1);
+
+  depthFill.style.height  = pct + '%';
+  depthVal.textContent    = meters.toLocaleString();
+  pressureEl.textContent  = atm + ' atm';
+  tempEl.textContent      = temp + '°C';
+}
+
+// ── Smooth depth with lerp ───────────────────────────────
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// ── Continuous ripple drip while cursor is still ─────────
+let rippleTimer = 0;
+
+// ── Animation loop ───────────────────────────────────────
+let last = 0;
+function loop(ts) {
+  const dt = Math.min((ts - last) / 16.67, 3);
+  last = ts;
+
+  causticTime += 0.012 * dt;
+  rayPhase    += 0.008 * dt;
+  depth        = lerp(depth, targetDepth, 0.02);
+
+  // lazy ripple when mouse isn't moving
+  rippleTimer += dt;
+  const spd = Math.sqrt(mouse.vx*mouse.vx + mouse.vy*mouse.vy);
+  if (spd > 1.5) {
+    dropRipple(mouse.x, mouse.y, 2 + spd * 0.15);
+    rippleTimer = 0;
+  } else if (rippleTimer > 45) {
+    dropRipple(mouse.x, mouse.y, 1.5);
+    rippleTimer = 0;
+  }
+
+  // step ripple sim
+  stepRipple();
+  stepRipple();   // double step for speed
+
+  // draw layers
+  drawBackground(cBg.ctx, depth);
+  drawGodRays(cRays.ctx, causticTime);
+  drawRipple();
+  updateParticles(dt);
+  drawParticles(cPart.ctx);
+  drawUI(cUi.ctx);
+  updateHUD(depth);
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ── Resize ───────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  initCanvases();
+  initRipple();
+  initParticles();
+});
+</script>
+</body>
+</html>
